@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseTime | Attendance Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">PT</div>
+        <div>
+          <p class="brand-kicker">Workforce</p>
+          <h1>PulseTime</h1>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view="attendance">Daily Attendance</button>
+        <button class="nav-btn" data-view="employees">Employees</button>
+        <button class="nav-btn" data-view="reports">Reports</button>
+      </nav>
+      <div class="sidebar-note">
+        <p>Office hours start at 09:00. Arrivals after 09:15 are marked late.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="pageEyebrow">Overview</p>
+          <h2 id="pageTitle">Attendance dashboard</h2>
+        </div>
+        <div class="topbar-meta">
+          <span id="clockLabel"></span>
+          <span class="chip" id="todayChip"></span>
+        </div>
+      </header>
+
+      <section id="view-dashboard" class="view active">
+        <div class="stat-grid">
+          <article class="stat-card">
+            <p>Team size</p>
+            <strong id="statTotal">0</strong>
+          </article>
+          <article class="stat-card present">
+            <p>Present</p>
+            <strong id="statPresent">0</strong>
+          </article>
+          <article class="stat-card late">
+            <p>Late</p>
+            <strong id="statLate">0</strong>
+          </article>
+          <article class="stat-card absent">
+            <p>Absent</p>
+            <strong id="statAbsent">0</strong>
+          </article>
+        </div>
+        <div class="split">
+          <article class="panel">
+            <div class="panel-head">
+              <h3>Department snapshot</h3>
+            </div>
+            <div id="deptList" class="dept-list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <h3>Recent activity</h3>
+            </div>
+            <div id="recentList" class="activity-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-attendance" class="view">
+        <article class="panel">
+          <div class="panel-head">
+            <h3>Today's register</h3>
+            <div class="toolbar">
+              <label>
+                Date
+                <input type="date" id="attendanceDate">
+              </label>
+              <button class="ghost" id="refreshAttendance">Refresh</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Department</th>
+                  <th>Check in</th>
+                  <th>Check out</th>
+                  <th>Hours</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="attendanceBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-employees" class="view">
+        <article class="panel">
+          <div class="panel-head">
+            <h3>Directory</h3>
+            <div class="toolbar">
+              <input type="search" id="employeeSearch" placeholder="Search name, code, email">
+              <button class="primary" id="openEmployeeModal">Add employee</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Department</th>
+                  <th>Role</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="employeeBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-reports" class="view">
+        <article class="panel">
+          <div class="panel-head">
+            <h3>Attendance summary</h3>
+            <div class="toolbar">
+              <label>
+                From
+                <input type="date" id="reportFrom">
+              </label>
+              <label>
+                To
+                <input type="date" id="reportTo">
+              </label>
+              <button class="ghost" id="loadReports">Apply</button>
+            </div>
+          </div>
+          <div id="dailyBars" class="daily-bars"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Present</th>
+                  <th>Late</th>
+                  <th>Absent</th>
+                  <th>Recorded days</th>
+                </tr>
+              </thead>
+              <tbody id="reportBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="employeeModal" hidden>
+    <form class="modal" id="employeeForm">
+      <h3>New employee</h3>
+      <label>Employee code<input name="code" required placeholder="EMP007"></label>
+      <label>Full name<input name="name" required placeholder="Full name"></label>
+      <label>Email<input name="email" type="email" required placeholder="name@company.com"></label>
+      <label>Department<input name="department" required placeholder="Engineering"></label>
+      <label>Role<input name="role" placeholder="Staff"></label>
+      <p class="form-error" id="employeeError"></p>
+      <div class="modal-actions">
+        <button type="button" class="ghost" id="closeEmployeeModal">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
